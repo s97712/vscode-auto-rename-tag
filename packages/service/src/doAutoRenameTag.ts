@@ -37,25 +37,6 @@ export const doAutoRenameTag: (
     scanner.stream.goTo(offset);
     const tagName = newWord.slice(2);
     const oldTagName = oldWord.slice(2);
-    if (oldTagName.startsWith('script') || oldTagName.startsWith('style')) {
-      const tag = `<${oldTagName}`;
-      let i = scanner.stream.position;
-      let found = false;
-      while (i--) {
-        if (text.slice(i).startsWith(tag)) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        return undefined;
-      }
-      return {
-        startOffset: i + 1,
-        endOffset: i + 1 + oldTagName.length,
-        tagName
-      };
-    }
     const parent = getPreviousOpeningTagName(
       scanner,
       scanner.stream.position,
@@ -85,28 +66,6 @@ export const doAutoRenameTag: (
     scanner.stream.goTo(offset + 1);
     const tagName = newWord.slice(1);
     const oldTagName = oldWord.slice(1);
-    if (oldTagName.startsWith('script') || oldTagName.startsWith('style')) {
-      const hasAdvanced = scanner.stream.advanceUntilEitherChar(
-        ['>'],
-        true,
-        isReact
-      );
-      if (!hasAdvanced) {
-        return undefined;
-      }
-      const match = text
-        .slice(scanner.stream.position)
-        .match(new RegExp(`</${oldTagName}`));
-      if (!match) {
-        return undefined;
-      }
-      const index = match.index as number;
-      return {
-        startOffset: scanner.stream.position + index + 2,
-        endOffset: scanner.stream.position + index + 2 + oldTagName.length,
-        tagName
-      };
-    }
     const hasAdvanced = scanner.stream.advanceUntilEitherChar(
       ['<', '>'],
       true,
